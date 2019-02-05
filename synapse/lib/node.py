@@ -433,7 +433,9 @@ class Node:
         await self._setTagProp(name, norm, indx, info)
 
         await self.snap.core.runTagAdd(self, name, norm)
-        await self.snap.core.triggers.run(self, 'tag:add', info={'form': self.form.name, 'tag': name})
+        # self.snap.triggertodo[self].append(('tag:add', {'form': self.form.name, 'tag': name}))
+        # await self.snap.core.triggers.run(self, 'tag:add', info={'form': self.form.name, 'tag': name})
+        self.snap.triggertodo.append((self, 'tag:add', {'form': self.form.name, 'tag': name}))
 
         return True
 
@@ -467,7 +469,9 @@ class Node:
             sops.append(('prop:del', (self.buid, self.form.name, '#' + subtag, info)))
 
         await self.snap.core.runTagDel(self, name, curv)
-        await self.snap.core.triggers.run(self, 'tag:del', info={'form': self.form.name, 'tag': name})
+        # await self.snap.core.triggers.run(self, 'tag:del', info={'form': self.form.name, 'tag': name})
+        # self.snap.triggertodo[self].append(('tag:del', {'form': self.form.name, 'tag': name}))
+        self.snap.triggertodo.append((self, 'tag:del', {'form': self.form.name, 'tag': name}))
         sops.append(('prop:del', (self.buid, self.form.name, '#' + name, info)))
 
         await self.snap.stor(sops)

@@ -2,6 +2,7 @@ import types
 import asyncio
 import logging
 import contextlib
+import collections
 
 import synapse.exc as s_exc
 import synapse.common as s_common
@@ -65,7 +66,12 @@ class Snap(s_base.Base):
         self.changelog = []
         self.tagtype = core.model.type('ival')
 
+        # self.triggertodo = collections.defaultdict(list)
+        self.triggertodo = collections.deque()
+
         async def fini():
+
+            await self.firetriggers()
 
             for layr in self.layers:
                 try:
@@ -80,6 +86,31 @@ class Snap(s_base.Base):
             # N.B. don't fini the layers here since they are owned by the cortex
 
         self.onfini(fini)
+
+    async def firetriggers(self):
+        # await node.snap.core.triggers.run(node, 'node:add', info={'form': self.name})
+        # await node.snap.core.triggers.run(node, 'node:del', info={'form': self.name}) # uhhh what....
+        # await self.snap.core.triggers.run(self, 'tag:add', info={'form': self.form.name, 'tag': name})
+        # await self.snap.core.triggers.run(self, 'tag:del', info={'form': self.form.name, 'tag': name})
+        # await snap.core.triggers.run(node, 'prop:set', info={'prop': prop.full})
+
+        # # XXX This won't work for node:del
+        # for buid, actions in self.triggertodo.items():
+        #     node = await self.getNodeByBuid(buid)
+        #     for act, info in actions:
+        #         await self.core.triggers.run(node, act, info)
+
+        # for node, actions in self.triggertodo.items():
+        #     for act, info in actions:
+        #          await self.core.triggers.run(node, act, info=info)
+        i = 0
+        while self.triggertodo:
+            node, act, info = self.triggertodo.popleft()
+            print(f'executing trigger: {node} {act} {info}')
+            await self.core.triggers.run(node, act, info=info)
+            i = i + 1
+            if i % 50 == 0:  # Be fair....
+                await asyncio.sleep(0)
 
     @contextlib.contextmanager
     def getStormRuntime(self, opts=None, user=None):

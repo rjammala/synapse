@@ -267,7 +267,9 @@ class Form:
         Fire the onAdd() callbacks for node creation.
         '''
 
-        await node.snap.core.triggers.run(node, 'node:add', info={'form': self.name})
+        # await node.snap.core.triggers.run(node, 'node:add', info={'form': self.name})
+        # node.snap.triggertodo[node].append(('node:add', {'form': self.name}))
+        node.snap.triggertodo.append((node, 'node:add', {'form': self.name}))
 
         for func in self.onadds:
             try:
@@ -283,7 +285,8 @@ class Form:
         '''
         Fire the onDel() callbacks for node deletion.
         '''
-        await node.snap.core.triggers.run(node, 'node:del', info={'form': self.name})
+        # await node.snap.core.triggers.run(node, 'node:del', info={'form': self.name})
+        node.snap.triggertodo.append((node, 'node:del', {'form': self.name}))
 
         for func in self.ondels:
             try:
